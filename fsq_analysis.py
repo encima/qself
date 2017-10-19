@@ -1,25 +1,27 @@
 import json
-import config
+import configparser
 import requests
 
 
 class FsqHandler:
 
     def __init__(self):
-        self.client_id = config.foursquare['client_id']
-        self.client_secret = config.foursquare['client_secret']
-        self.redirect_uri = config.foursquare['redirect_uri']
-        self.access_url = config.foursquare['access_url']
-        self.access_token = config.foursquare['access_token']
-        self.base_url = config.foursquare['base_url']
+        config = configparser.ConfigParser()
+        config.read('config.ini') 
+        self.client_id = config['foursquare']['client_id']
+        self.client_secret = config['foursquare']['client_secret']
+        self.redirect_uri = config['foursquare']['redirect_uri']
+        self.access_url = config['foursquare']['access_url']
+        self.access_token = config['foursquare']['access_token']
+        self.base_url = config['foursquare']['base_url']
         if self.access_token == "":
             self.oauth_authorise()
         else:
-            self.access_token = config.foursquare['access_token']
+            self.access_token = config['foursquare']['access_token']
 
     def oauth_authorise(self):
         print("Go to the following URL and paste the code in the URL below:")
-        auth = config.foursquare['auth_url'].format(self.client_id, self.redirect_uri)
+        auth = config['foursquare']['auth_url'].format(self.client_id, self.redirect_uri)
         print(auth)
         key = input("Paste key here: ")
         print(key)

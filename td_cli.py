@@ -1,7 +1,7 @@
 import todoist
 import config 
 
-t_api = todoist.TodoistAPI(config.USER_TOKEN)
+t_api = todoist.TodoistAPI(config.todoist['USER_TOKEN'])
 #user = t_api.user.login_with_google(config.GOOGLE_EMAIL, config.GOOGLE_ACCESS)
 res = t_api.sync()
 print(res)
