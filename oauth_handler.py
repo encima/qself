@@ -1,17 +1,16 @@
 import json
+import configparser
 import requests
 
 class Oauth_Handler:
 
-    def __init__(self):
-        self.client_id = None
-        self.client_secret = None
-        self.response_type = "code"
-        self.redirect_uri = None
-        self.access_url = None
-        self.access_token = None
+    def __init__(self, service):
+        self.config = configparser.ConfigParser()
+        self.config.read('config.ini') 
 
-    def oauth_authorise(self):
+    def oauth_authorise(self, service, url):
+        print("Go to the following URL and paste the code in the URL below:")
+        print(url)
         pass
 
     def oauth_access(self):
