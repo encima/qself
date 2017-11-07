@@ -1,6 +1,6 @@
 data/
 config.ini
-qs/ #virtualenv
+qs/* #virtualenv
 #### joe made this: http://goel.io/joe
 ma/
 config.py

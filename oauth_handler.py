@@ -1,8 +1,7 @@
 import json
 import configparser
 import requests
-
-import oauth_server
+import oauth_server as s
 
 class Oauth_Handler:
 
@@ -10,12 +9,17 @@ class Oauth_Handler:
         self.config = configparser.ConfigParser()
         self.config.read('config.ini') 
         self.service = service
+        self.server = s.Oauth_Server()
 
     def oauth_authorise(self, url):
         print("Go to the following URL and paste the code in the URL below:")
         print(url)
-        s = oauth_server.start_server()
+        self.server.serve()
 
     def oauth_close(self):
-        s = oauth_server.shutdown_server()
+        self.server.shutdown()
+
+    def oauth_token(self, url, args):
+        r = requests.post(url, data=args)
+        return r.json()
 

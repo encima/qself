@@ -1,16 +1,19 @@
 import requests
 import configparser
 import oauth_handler as o
+import sqlite3
 
 class Spotify_Handler:
-    
+
+    token = None
+
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.config.read('config.ini')
 
     def get_playlists(self):
-        playlists = requests.get(self.config['spotify']['url'] + '/v1/me/playlists', headers={
-                                'Authorization': self.config['spotify']['token']})
+        playlists = requests.get(self.config['spotify']['API_URL'] + 'me/playlists', headers={
+                                'Authorization': self.access_token})
         p = playlists.json()
         print(p)
 
@@ -18,22 +21,21 @@ class Spotify_Handler:
         auth = "{}?client_id={}&scopes={}&response_type={}&redirect_uri={}".format(self.config['spotify']['AUTH_URL'], self.config['spotify']['CLIENT_ID'], self.config['spotify']['SCOPES'], 'code', self.config['spotify']['REDIRECT'])
         return auth
 
-    def oauth_authorise(self):
-        print("Go to the following URL and paste the code in the URL below:")
-        print(auth)
-        key = input("Paste key here: ")
-        print(key)
-        # j = auth_response.json()
-        # if 'error' not in j:
-        #     pass
-        #     # self.access_token = j['access_token']
-        # else:
-        #     print(j)
+    def request(self):
+        self.o = o.Oauth_Handler('spotify')
+        self.o.server.add_endpoint('/spotify', 'Spotify', s.save_code)
+        url = s.build_url()
+        self.o.oauth_authorise(url)
+
+    def save_code(self, args):
+        print(args['code'])
+        self.token = args['code']
+        self.o.oauth_close()
+        access_token = self.o.oauth_token(self.config['spotify']['TOKEN_URL'], {'redirect_uri':self.config['spotify']['REDIRECT'], 'code':self.token, 'grant_type':"authorization_code", 'client_id':self.config['spotify']['CLIENT_ID'], 'client_secret':self.config['spotify']['CLIENT_SECRET']})
+        print(access_token)
+        self.access_token = access_token['access_token']
+
 
 s = Spotify_Handler()
-o = o.Oauth_Handler('spotify')
-url = s.build_url()
-o.oauth_authorise(url)
-code = input('Code here:')
-o.oauth_close()
-# get_playlists()
+s.request()
+s.get_playlists()
