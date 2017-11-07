@@ -1,4 +1,4 @@
-#!/home/encima/dev/personal/qself/qs/bin/python
+#!/home/encima/dev/qself/qs/bin/python
 
 import sys
 import getopt

@@ -1,9 +1,17 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/spotify')
 def callback():
-    return 'Hello, World!'
+    return render_template('redirect', req.args.code)
 
-app.run(port=8080)
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+def start_server():
+    app.run(port=8080)
