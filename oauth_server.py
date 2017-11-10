@@ -32,6 +32,7 @@ class Oauth_Server(object):
         pass
 
     def add_endpoint(self, endpoint=None, endpoint_name=None, handler=None):
+        print('Adding endpoint for: ' + endpoint)
         self.app.add_url_rule(endpoint, endpoint_name, EndpointAction(handler))
 
 

@@ -35,12 +35,8 @@ class FsqHandler:
         params = {"client_id": self.client_id, "client_secret":self.client_secret,
                   "grant_type":"authorization_code", "redirect_uri":self.redirect_uri,
                   "code": key}
-        auth_response = requests.get(self.access_url, params = params)
-        j = auth_response.json()
-        if 'error' not in j:
-            self.access_token = j['access_token']
-        else:
-            print(j)
+        token_res = self.o.oauth_token(self.access_url, params, 'GET')
+        self.access_token = token_res['access_token']
 
 
     def get_checkins(self):

@@ -27,21 +27,20 @@ class Spotify_Handler:
         auth = self.sp['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
         return auth
 
-    def request(self):
+    def oauth_authorise(self):
         self.o = o.Oauth_Handler('spotify')
         self.o.server.add_endpoint('/spotify', 'Spotify', self.save_code)
         url = s.build_url()
         self.o.oauth_authorise(url)
 
     def save_code(self, args):
-        print(args['code'])
         self.token = args['code']
         self.o.oauth_close()
-        access_token = self.o.oauth_token(self.config['spotify']['TOKEN_URL'], {'redirect_uri':self.config['spotify']['REDIRECT'], 'code':self.token, 'grant_type':"authorization_code", 'client_id':self.config['spotify']['CLIENT_ID'], 'client_secret':self.config['spotify']['CLIENT_SECRET']})
-        print(access_token)
-        self.access_token = access_token['access_token']
+        token_res = self.o.oauth_token(self.sp['TOKEN_URL'], {'redirect_uri':self.sp['REDIRECT'], 'code':self.token, 'grant_type':"authorization_code", 'client_id':self.config['spotify']['CLIENT_ID'], 'client_secret':self.sp['CLIENT_SECRET']}, 'POST')
+        self.access_token = token_res['access_token']
+        self.refresh_token = token_res['refresh_token']
 
 
 s = Spotify_Handler()
-s.request()
-s.get_playlists()
+s.oauth_authorise()
+# s.get_playlists()
