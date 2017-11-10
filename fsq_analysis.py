@@ -1,30 +1,37 @@
 import json
 import configparser
 import requests
+import oauth_handler as o
 
 
 class FsqHandler:
 
     def __init__(self):
-        config = configparser.ConfigParser()
-        config.read('config.ini') 
-        self.client_id = config['foursquare']['client_id']
-        self.client_secret = config['foursquare']['client_secret']
-        self.redirect_uri = config['foursquare']['redirect_uri']
-        self.access_url = config['foursquare']['access_url']
-        self.access_token = config['foursquare']['access_token']
-        self.base_url = config['foursquare']['base_url']
-        if self.access_token == "":
+        self.config = configparser.ConfigParser()
+        self.config.read('config.ini') 
+        self.fsq = self.config['foursquare']
+        self.client_id = self.fsq['CLIENT_ID']
+        self.client_secret = self.fsq['CLIENT_SECRET']
+        self.redirect_uri = self.fsq['REDIRECT']
+        self.access_token = ""
+        self.base_url = self.fsq['API_URL']
+        self.o = o.Oauth_Handler('foursquare')
+        if not self.access_token:
             self.oauth_authorise()
-        else:
-            self.access_token = config['foursquare']['access_token']
 
     def oauth_authorise(self):
-        print("Go to the following URL and paste the code in the URL below:")
-        auth = config['foursquare']['auth_url'].format(self.client_id, self.redirect_uri)
-        print(auth)
-        key = input("Paste key here: ")
-        print(key)
+        self.o.server.add_endpoint('/fousqaure', 'Foursquare', self.save_code)
+        url = self.build_url()
+        self.o.oauth_authorise(url)
+
+    def build_url(self):
+        auth = self.fsq['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
+        return auth
+
+
+    def save_code(self, args):
+        self.token = args['code']
+        self.o.oauth_close()
         params = {"client_id": self.client_id, "client_secret":self.client_secret,
                   "grant_type":"authorization_code", "redirect_uri":self.redirect_uri,
                   "code": key}
@@ -34,6 +41,7 @@ class FsqHandler:
             self.access_token = j['access_token']
         else:
             print(j)
+
 
     def get_checkins(self):
         url = self.base_url + "users/self/checkins"
@@ -57,7 +65,4 @@ if __name__ == '__main__':
     checkins = fsq.get_checkins()
     with open('data/fsq_checkins.json', 'w') as fp:
         json.dump(checkins, fp)
-
-
-#checkins = requests.post(config.foursquare["base_url"], data={'key':'value'})
 

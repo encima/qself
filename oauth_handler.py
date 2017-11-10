@@ -19,7 +19,10 @@ class Oauth_Handler:
     def oauth_close(self):
         self.server.shutdown()
 
-    def oauth_token(self, url, args):
-        r = requests.post(url, data=args)
+    def oauth_token(self, url, args, method='GET'):
+        if method == 'GET':
+            r = requests.get(url, params=args)
+        else:
+            r = requests.post(url, data=args)
         return r.json()
 

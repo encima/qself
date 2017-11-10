@@ -10,20 +10,26 @@ class Spotify_Handler:
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.config.read('config.ini')
+        self.sp = self.config['spotify']
+        self.client_id = self.sp['CLIENT_ID']
+        self.client_secret = self.sp['CLIENT_SECRET']
+        self.redirect_uri = self.sp['REDIRECT']
+        self.access_token = ""
+        self.base_url = self.sp['API_URL']
 
     def get_playlists(self):
-        playlists = requests.get(self.config['spotify']['API_URL'] + 'me/playlists', headers={
-                                'Authorization': self.access_token})
+        playlists = requests.get(self.base_url + 'me/playlists', headers={
+                                'Authorization': "Bearer {}".format(self.access_token)})
         p = playlists.json()
         print(p)
 
     def build_url(self):
-        auth = "{}?client_id={}&scopes={}&response_type={}&redirect_uri={}".format(self.config['spotify']['AUTH_URL'], self.config['spotify']['CLIENT_ID'], self.config['spotify']['SCOPES'], 'code', self.config['spotify']['REDIRECT'])
+        auth = self.sp['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
         return auth
 
     def request(self):
         self.o = o.Oauth_Handler('spotify')
-        self.o.server.add_endpoint('/spotify', 'Spotify', s.save_code)
+        self.o.server.add_endpoint('/spotify', 'Spotify', self.save_code)
         url = s.build_url()
         self.o.oauth_authorise(url)
 
