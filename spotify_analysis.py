@@ -16,16 +16,16 @@ class Spotify_Handler:
         self.redirect_uri = self.sp['REDIRECT']
         self.access_token = ""
         self.base_url = self.sp['API_URL']
-        self.conn = sqlite3.connect('tokens.db')
+        self.conn = sqlite3.connect('data/tokens.db')
         self.cursor = self.conn.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS tokens (service text, token text)')
         self.conn.commit()
         self.cursor.execute('SELECT token FROM tokens WHERE service="spotify"')
-        self.access_token = self.cursor.fetchone()[0]
-        if not self.access_token:
+        res = self.cursor.fetchone()
+        if not res:
             self.oauth_authorise()
         else: 
-            print(self.access_token[0])
+            self.access_token = res[0]
             self.get_playlists()
 
 
