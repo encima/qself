@@ -33,7 +33,23 @@ class Spotify_Handler:
         playlists = requests.get(self.base_url + 'me/playlists', headers={
                                 'Authorization': "Bearer {}".format(self.access_token)})
         p = playlists.json()
-        print(p)
+        playlists = p['items']
+        for p in playlists:
+            self.get_tracks(p['owner']['id'], p['id'])
+    
+    def get_tracks(self, owner, playlist):
+        tracks = requests.get(self.base_url + 'users/{}/playlists/{}/tracks'.format(owner, playlist), headers={
+                                'Authorization': "Bearer {}".format(self.access_token)})
+        t = tracks.json()
+        tracks = t['items']
+        t_id = []
+        for t in tracks:
+            print(t)
+            t_id.append(t['track']['id'])
+        print(t_id)
+    
+    def get_track_features(self, tracks):
+        pass
 
     def build_url(self):
         auth = self.sp['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
