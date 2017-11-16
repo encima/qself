@@ -24,5 +24,6 @@ class Oauth_Handler:
             r = requests.get(url, params=args)
         else:
             r = requests.post(url, data=args)
+        print(r.url)
         return r.json()
 
