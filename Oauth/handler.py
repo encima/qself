@@ -17,7 +17,7 @@ class OauthHandler:
         self.access_url = self.auth['TOKEN_URL']
         self.base_url = self.auth['API_URL']
         self.server = OauthServer()
-        self.conn = sqlite3.connect('data/tokens.db')
+        self.conn = sqlite3.connect('data/tokens.db', check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS tokens (service text, token text)')
         self.conn.commit()
