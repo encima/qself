@@ -1,10 +1,10 @@
 import json
 import configparser
 import requests
-import oauth_server as s
+from Oauth.server import OauthServer
 import sqlite3
 
-class Oauth_Handler:
+class OauthHandler:
 
     def __init__(self, service):
         self.config = configparser.ConfigParser()
@@ -16,7 +16,7 @@ class Oauth_Handler:
         self.redirect_uri = self.auth['REDIRECT']
         self.access_url = self.auth['TOKEN_URL']
         self.base_url = self.auth['API_URL']
-        self.server = s.Oauth_Server()
+        self.server = OauthServer()
         self.conn = sqlite3.connect('data/tokens.db')
         self.cursor = self.conn.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS tokens (service text, token text)')
@@ -26,7 +26,7 @@ class Oauth_Handler:
         self.server.add_endpoint('/{}'.format(self.service), self.service, self.save_code)
         print("Go to the following URL and paste the code in the URL below:")
         print(self.build_url())
-        self.server.serve()
+        self.server.start()
 
     def build_url(self):
         auth = self.auth['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
@@ -36,7 +36,7 @@ class Oauth_Handler:
         self.cursor.execute('SELECT token FROM tokens WHERE service="{}"'.format(self.service))
         res = self.cursor.fetchone()
         if not res:
-            self.oauth_authorise()
+            return None
         else:
             return res[0]
 
@@ -52,7 +52,6 @@ class Oauth_Handler:
 
     def save_code(self, args):
         print('CODE RECEIVED')
-        self.oauth_close()
         params = {"client_id": self.client_id, "client_secret":self.client_secret,
                   "grant_type":"authorization_code", "redirect_uri":self.redirect_uri,
                   "code": args['code']}
@@ -64,8 +63,10 @@ class Oauth_Handler:
             self.conn.cursor().execute('INSERT INTO tokens VALUES(?,?)', (self.service, access_token))
             self.conn.commit()
             print('Saved new token')
+            self.oauth_close()
             return access_token
         else:
             print('Something happened when trying to get your token')
+            self.oauth_close()
             return None
 

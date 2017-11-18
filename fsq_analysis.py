@@ -1,7 +1,7 @@
 import json
 import configparser
 import requests
-import oauth_handler as o
+from Oauth import OauthHandler
 import sqlite3
 
 class FsqHandler:
@@ -11,10 +11,9 @@ class FsqHandler:
         self.config.read('config.ini') 
         self.fsq = self.config['foursquare']
         self.base_url = self.fsq['API_URL']
-        self.auth = o.Oauth_Handler('foursquare')
+        self.auth = OauthHandler('foursquare')
         self.access_token = self.auth.get_token()
-        print(self.access_token)
-        if not self.get_checkins():
+        if not self.access_token or not self.get_checkins():
             self.auth.oauth_authorise()
         else:
             self.get_checkins()
@@ -42,5 +41,4 @@ class FsqHandler:
 
 if __name__ == '__main__':
     fsq = FsqHandler()
-    checkins = fsq.get_checkins()
 

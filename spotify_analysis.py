@@ -1,6 +1,6 @@
 import requests
 import configparser
-import oauth_handler as o
+from Oauth import OauthHandler
 import sqlite3
 
 class Spotify_Handler:
@@ -12,10 +12,9 @@ class Spotify_Handler:
         self.config.read('config.ini')
         self.sp = self.config['spotify']
         self.base_url = self.sp['API_URL']
-        self.auth = o.Oauth_Handler('spotify')
+        self.auth = OauthHandler('spotify')
         self.access_token = self.auth.get_token()
-        print(self.access_token)
-        if not self.get_playlists():
+        if not self.access_token or not self.get_playlists():
             self.auth.oauth_authorise()
         else:
             self.get_playlists()
