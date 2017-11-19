@@ -17,7 +17,8 @@ class LastfmHandler:
         print(tracks)
 
 
-l = LastfmHandler()
-start = datetime(2017, 7, 27, 00, 1)
-end = datetime(2017, 7, 27, 23, 59)
-l.get_tracks_for_range(start, end)
+if __name__== '__main__':
+    l = LastfmHandler()
+    start = datetime(2017, 7, 27, 00, 1)
+    end = datetime(2017, 7, 27, 23, 59)
+    l.get_tracks_for_range(start, end)

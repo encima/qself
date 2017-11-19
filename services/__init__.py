@@ -1,0 +1,5 @@
+from services.fsq_analysis import FsqHandler
+from services.lastfm_analysis import LastfmHandler
+from services.movie_analysis import MovieHandler
+from services.spotify_analysis import SpotifyHandler
+from services.todoist_analysis import TaskHandler
