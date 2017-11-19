@@ -21,6 +21,7 @@ pylint==1.7.4
 pyserial==3.4
 requests==2.18.4
 six==1.11.0
+terminaltables==3.1.0
 tmdbsimple==1.8.0
 todoist==0.0.1
 urllib3==1.22

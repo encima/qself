@@ -18,6 +18,16 @@ class FsqHandler:
         os.environ['TZ']='UTC'
         if not self.access_token:
             self.auth.oauth_authorise()
+
+    def get_recommended_places_nearby(self, lat, lng, type='query', term=None):
+        url = self.base_url + "venues/explore"
+        ll = '{},{}'.format(lat, lng)
+        params = {'oauth_token': self.access_token, 'll':ll, "v":20161208, 'sortByDistance': 1}
+        if term:
+            params[type] = term
+        res = requests.get(url, params=params)
+        j = res.json()
+        return j['response']['groups']
     
     def get_checkins_for_range(self, start = None, end=None, d_format ='%Y-%m-%d %H:%M:%S', paging = True):
         url = self.base_url + "users/self/checkins"
