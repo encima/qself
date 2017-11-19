@@ -35,12 +35,24 @@ class Qself:
                 end_date = date.replace(hour=23, minute=59)
                 places = self.f.get_checkins_for_range(datetime.datetime.strftime(start_date, d_format), datetime.datetime.strftime(end_date, d_format), d_format, False)
                 tracks = self.l.get_tracks_for_range(start_date, end_date)
-                prompt.puts('You watched {} movies that day'.format(len(movies)))
-                movies_table = [x['movie'] for x in movies]
+                
+                movies_table = [['Movies: {}'.format(len(movies))]]
+                for x in movies:
+                    movies_table.append([x['movie']])
                 table = AsciiTable(movies_table)
                 print(table.table)
-                prompt.puts('You went to {} places that day'.format(len(places)))
-                prompt.puts('You listened to {} tracks that day'.format(len(tracks)))
+                
+                places_table = [['Places: {}'.format(len(places))]]
+                for x in places:
+                    places_table.append([x['venue']['name']])
+                table = AsciiTable(places_table)
+                print(table.table)
+
+                music_table = [['Music: {}'.format(len(tracks))]]
+                for x in tracks:
+                    music_table.append([x.track])
+                table = AsciiTable(music_table)
+                print(table.table)
             elif arg =='recommend':
                 choice = 'movie'
                 if len(args) >= 2:
