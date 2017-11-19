@@ -20,6 +20,7 @@ class Qself:
         self.s = SpotifyHandler()
         self.l = LastfmHandler()
         self.f = FsqHandler()
+        self.t = TastekidHandler()
         self.geolocator = Nominatim()
 
     def prompt(self, args):
@@ -59,8 +60,14 @@ class Qself:
                     choice = args[1]
                 choice = choice.lower()
                 print('Recommending {}'.format(choice))
-                if choice == 'movie':
-                    pass
+                if choice == 'movies' or choice == 'books':
+                    q = [(args[2], args[3])]
+                    recs = self.t.get_similar(q, choice)
+                    movies_table = [['{}: {}'.format(choice.title(), len(recs))]]
+                    for x in recs:
+                        movies_table.append([x['Name'], x['wUrl']])
+                    table = AsciiTable(movies_table)
+                    print(table.table)
                 elif choice == 'places':
                     location = self.geolocator.geocode(args[2])
                     print('Your lat and long is {} {}'.format(location.latitude, location.longitude))
