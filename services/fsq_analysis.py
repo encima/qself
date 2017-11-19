@@ -19,28 +19,27 @@ class FsqHandler:
         if not self.access_token:
             self.auth.oauth_authorise()
     
-    def get_checkins_for_range(self, start = None, end=None):
+    def get_checkins_for_range(self, start = None, end=None, d_format ='%Y-%m-%d %H:%M:%S', paging = True):
         url = self.base_url + "users/self/checkins"
         if not start:
             start = str(datetime.utcnow())
-        d_format ='%Y-%m-%d %H:%M:%S'
-        start = int(time.mktime(time.strptime(start,d_format)))
+        start = int(time.mktime(time.strptime(start, d_format)))
         checkins = []
         offset = 0
-        total = 1000000 #set high and reduce since Python does not have a do while
+        limit = 250 if paging else 100
+        total = 1000000  if paging else limit #set high and reduce since Python does not have a do while
         while offset < total:
             params = {"oauth_token":self.access_token, "afterTimestamp":start,
-                      "limit":250, "v":20161208, "offset":offset}
+                      "limit":limit, "v":20161208, "offset":offset}
             if end:
                 params['beforeTimestamp'] = int(time.mktime(time.strptime(end, d_format)))
             res = requests.get(url, params = params)
             if res.status_code == 401:
                 return False
             j = res.json()
-            offset += 250
+            offset += limit
             if 'checkins' in j['response']:
-                total = j['response']['checkins']['count']
-                print(offset, total)
+                total = j['response']['checkins']['count'] if paging else total
                 checkins.extend(j['response']['checkins']['items'])
             else:
                 break

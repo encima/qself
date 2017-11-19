@@ -16,13 +16,15 @@ class OauthHandler:
         self.redirect_uri = self.auth['REDIRECT']
         self.access_url = self.auth['TOKEN_URL']
         self.base_url = self.auth['API_URL']
-        self.server = OauthServer()
+        self.server = None
         self.conn = sqlite3.connect('data/tokens.db', check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS tokens (service text, token text)')
         self.conn.commit()
 
     def oauth_authorise(self):
+        if not self.server:
+            self.server = OauthServer()
         self.server.add_endpoint('/{}'.format(self.service), self.service, self.save_code)
         print("Go to the following URL and paste the code in the URL below:")
         print(self.build_url())
@@ -42,6 +44,7 @@ class OauthHandler:
 
     def oauth_close(self):
         self.server.shutdown()
+        self.server = None
 
     def oauth_token(self, url, args, method='GET'):
         if method == 'GET':

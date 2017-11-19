@@ -14,7 +14,7 @@ class LastfmHandler:
         start = start.replace(tzinfo=timezone.utc).timestamp()
         end = end.replace(tzinfo=timezone.utc).timestamp()
         tracks = self.network.get_user('encima').get_recent_tracks(limit=200, time_from=start, time_to=end)
-        print(tracks)
+        return tracks
 
 
 if __name__== '__main__':
