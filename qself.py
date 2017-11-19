@@ -78,6 +78,13 @@ class Qself:
                             places_table.append([i['venue']['name'], i['venue']['location']['distance'], i['reasons']['items'][0]['summary']])
                     table = AsciiTable(places_table)
                     print(table.table)
+            elif arg == 'summary':
+                movies = self.m.checkins
+                print('{} movies'.format(len(movies)))
+                checkins = self.f.get_checkins_for_range()
+                print('{} places'.format(len(checkins)))
+                tracks = self.l.get_all_tracks()
+                print('{} tracks'.format(tracks))
 
 if __name__ == '__main__':
     q = Qself()

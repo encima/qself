@@ -16,9 +16,15 @@ class LastfmHandler:
         tracks = self.network.get_user('encima').get_recent_tracks(limit=200, time_from=start, time_to=end)
         return tracks
 
+    def get_all_tracks(self):
+        tracks = self.network.get_user('encima').get_playcount()
+        return tracks
+
 
 if __name__== '__main__':
     l = LastfmHandler()
     start = datetime(2017, 7, 27, 00, 1)
     end = datetime(2017, 7, 27, 23, 59)
-    l.get_tracks_for_range(start, end)
+    # l.get_tracks_for_range(start, end)
+    t = l.get_all_tracks()
+    print(t)

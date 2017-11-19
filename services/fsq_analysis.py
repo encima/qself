@@ -32,17 +32,17 @@ class FsqHandler:
     def get_checkins_for_range(self, start = None, end=None, d_format ='%Y-%m-%d %H:%M:%S', paging = True):
         url = self.base_url + "users/self/checkins"
         if not start:
-            start = str(datetime.utcnow())
+            start = datetime.strftime(datetime.utcnow(), d_format)
         start = int(time.mktime(time.strptime(start, d_format)))
         checkins = []
         offset = 0
         limit = 250 if paging else 100
         total = 1000000  if paging else limit #set high and reduce since Python does not have a do while
         while offset < total:
-            params = {"oauth_token":self.access_token, "afterTimestamp":start,
+            params = {"oauth_token":self.access_token, "beforeTimestamp":start,
                       "limit":limit, "v":20161208, "offset":offset}
             if end:
-                params['beforeTimestamp'] = int(time.mktime(time.strptime(end, d_format)))
+                params['afterTimestamp'] = int(time.mktime(time.strptime(end, d_format)))
             res = requests.get(url, params = params)
             if res.status_code == 401:
                 return False
