@@ -1,7 +1,7 @@
 import json
 import configparser
 import requests
-from Oauth import OauthHandler
+from oauth import OauthHandler
 import sqlite3
 from datetime import datetime, timezone
 import time, os
@@ -28,21 +28,36 @@ class FsqHandler:
         res = requests.get(url, params=params)
         j = res.json()
         return j['response']['groups']
-    
+
+    def get_total_checkins(self):
+        url = self.base_url + "users/self/checkins"
+        params = {"oauth_token":self.access_token, "v":"20161208"}
+        res = requests.get(url, params = params)
+        if res.status_code == 401:
+            return False
+        j = res.json()
+        if 'checkins' in j['response']:
+            return j['response']['checkins']['count']
+        else:
+            return False
+
     def get_checkins_for_range(self, start = None, end=None, d_format ='%Y-%m-%d %H:%M:%S', paging = True):
         url = self.base_url + "users/self/checkins"
         if not start:
             start = datetime.strftime(datetime.utcnow(), d_format)
-        start = int(time.mktime(time.strptime(start, d_format)))
+        int_start = int(time.mktime(time.strptime(start, d_format)))
+        int_end = None
+        if end:
+            int_end = int(time.mktime(time.strptime(end, d_format)))
         checkins = []
         offset = 0
         limit = 250 if paging else 100
         total = 1000000  if paging else limit #set high and reduce since Python does not have a do while
         while offset < total:
-            params = {"oauth_token":self.access_token, "beforeTimestamp":start,
+            params = {"oauth_token":self.access_token, "afterTimestamp":int_start,
                       "limit":limit, "v":20161208, "offset":offset}
-            if end:
-                params['afterTimestamp'] = int(time.mktime(time.strptime(end, d_format)))
+            if int_end:
+               params['beforeTimestamp'] = int_end
             res = requests.get(url, params = params)
             if res.status_code == 401:
                 return False

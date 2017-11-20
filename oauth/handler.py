@@ -1,7 +1,7 @@
 import json
 import configparser
 import requests
-from Oauth.server import OauthServer
+from oauth.server import OauthServer
 import sqlite3
 
 class OauthHandler:

@@ -31,14 +31,17 @@ class MovieHandler:
         with open('./data/movie_checkins.json') as jsonfile:
             self.checkins = json.load(jsonfile)
 
-    def get_movies_on_date(self, date):
+    def get_movies_on_date(self, start, end=None):
         matching = []
+        if not end:
+            end = start
         for c in self.checkins:
             if len(c['watched']) > 0:
                 for w_date in c['watched']:
                     if w_date is not None:
                         w = datetime.fromtimestamp(int(w_date / 1000))
-                        if date.day == w.day and date.month == w.month and w.year == date.year:
+                        if w >= start and w <= end:
+                            # date.day == w.day and date.month == w.month and w.year == date.year:
                             matching.append(c)
         return matching
 
@@ -70,10 +73,12 @@ class MovieHandler:
             json.dump(details, fp)
 
 
-    def read_formatted(self):
+    def read_formatted(self, movies):
+        if not movies:
+            movies = self.checkins
         genres = []
-        print("You watched {0} movies".format(len(self.checkins)))
-        for d in self.checkins:
+        print("You watched {0} movies".format(len(movies)))
+        for d in movies:
             if 'genres' in d:
                 genre = [x['name'] for x in d['genres']]
                 genres.append(genre)
@@ -85,5 +90,11 @@ class MovieHandler:
         g_count = Counter(genres).most_common()
         for g in g_count:
             print("{0} makes up {1}% of your watching".format(
-                g[0], (g[1] / len(self.checkins)) * 100))
+                g[0], (g[1] / len(movies)) * 100))
 
+if __name__ == '__main__':
+    m = MovieHandler()
+    s = datetime.strptime('2017-04-01', '%Y-%m-%d')
+    e = datetime.strptime('2017-05-07', '%Y-%m-%d')
+    watched = m.get_movies_on_date(s, e)
+    print(watched) 

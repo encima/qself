@@ -1,6 +1,6 @@
 import requests
 import configparser
-from Oauth import OauthHandler
+from oauth import OauthHandler
 import sqlite3
 
 class SpotifyHandler:
