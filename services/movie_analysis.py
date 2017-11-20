@@ -5,6 +5,7 @@ import requests
 import collections
 from collections import Counter
 import configparser
+import urllib.parse
 
 
 
@@ -79,13 +80,15 @@ class MovieHandler:
         genres = []
         print("You watched {0} movies".format(len(movies)))
         for d in movies:
-            if 'genres' in d:
-                genre = [x['name'] for x in d['genres']]
+            title = urllib.parse.quote_plus(d['movie_id'])
+            movie = requests.get(self.BASE_URL.format(title), params=self.PAY_LOAD)
+            details = movie.json()
+            if 'genres' in details:
+                genre = [x['name'] for x in details['genres']]
                 genres.append(genre)
-                if d['watch_no'] > 1:
-                    print("You watched {0} {1} times, which is a mix of {2}".
-                        format(d['title'], d['watch_no'], genre))
-                    print('------')
+                print("You watched {0} {1} times, which is a mix of {2}".
+                    format(d['movie'], len(d['watched']), genre))
+                print('------')
         genres = self.flatten(genres)
         g_count = Counter(genres).most_common()
         for g in g_count:
