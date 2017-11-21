@@ -57,12 +57,12 @@ class Qself:
                 self.m.read_formatted(movies)
                 places_table = [['Places: {}'.format(len(places))]]
                 for x in places:
-                    places_table.append([x['venue']['name']])
+                    places_table.append(['{}, {}'.format(x['venue']['name'], x['venue']['location']['country'])])
                 table = AsciiTable(places_table)
                 print(table.table)
 
             elif arg =='recommend':
-                choice = 'movie'
+                choice = 'movies'
                 if len(args) >= 2:
                     choice = args[1]
                 choice = choice.lower()
@@ -77,17 +77,22 @@ class Qself:
                     print(table.table)
                 elif choice == 'places':
                     location = self.geolocator.geocode(args[2])
-                    print('Your lat and long is {} {}'.format(location.latitude, location.longitude))
-                    places = self.f.get_recommended_places_nearby(location.latitude, location.longitude, args[3], args[4])
-                    places_table = [['Place', 'Distance(m)', 'Why?']]
-                    for r in places:
-                        for i in r['items']:
-                            places_table.append([i['venue']['name'], i['venue']['location']['distance'], i['reasons']['items'][0]['summary']])
-                    table = AsciiTable(places_table)
-                    print(table.table)
+                    if location is not None:
+                        print('Your lat and long is {} {}'.format(location.latitude, location.longitude))
+                        places = self.f.get_recommended_places_nearby(location.latitude, location.longitude, args[3], args[4])
+                        places_table = [['Place', 'Distance(m)', 'Why?']]
+                        for r in places:
+                            for i in r['items']:
+                                places_table.append([i['venue']['name'], i['venue']['location']['distance'], i['reasons']['items'][0]['summary']])
+                        table = AsciiTable(places_table)
+                        print(table.table)
+                    else:
+                        print('Location not found')
             elif arg == 'summary':
                 movies = self.m.checkins
                 print('{} movies'.format(len(movies)))
+                if len(args) > 1 and args[1] == 'movies':
+                    self.m.read_formatted(movies)
                 checkins = self.f.get_total_checkins()
                 print('{} places'.format(checkins))
                 tracks = self.l.get_all_tracks()

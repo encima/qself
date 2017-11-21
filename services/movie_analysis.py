@@ -80,15 +80,16 @@ class MovieHandler:
         genres = []
         print("You watched {0} movies".format(len(movies)))
         for d in movies:
-            title = urllib.parse.quote_plus(d['movie_id'])
-            movie = requests.get(self.BASE_URL.format(title), params=self.PAY_LOAD)
-            details = movie.json()
-            if 'genres' in details:
-                genre = [x['name'] for x in details['genres']]
-                genres.append(genre)
-                print("You watched {0} {1} times, which is a mix of {2}".
-                    format(d['movie'], len(d['watched']), genre))
-                print('------')
+            if 'movie_id' in d:
+                title = urllib.parse.quote_plus(d['movie_id'])
+                movie = requests.get(self.BASE_URL.format(title), params=self.PAY_LOAD)
+                details = movie.json()
+                if 'genres' in details:
+                    genre = [x['name'] for x in details['genres']]
+                    genres.append(genre)
+                    print("You watched {0} {1} times, which is a mix of {2}".
+                        format(d['movie'], len(d['watched']), genre))
+                    print('------')
         genres = self.flatten(genres)
         g_count = Counter(genres).most_common()
         for g in g_count:
