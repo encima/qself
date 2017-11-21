@@ -41,7 +41,7 @@ class Qself:
                 str_end = datetime.datetime.strftime(end_date, d_format)
                 places = self.f.get_checkins_for_range(str_start, str_end, d_format, False)
                 tracks = self.l.get_tracks_for_range(start_date, end_date)
-                if len(tracks) > 30:
+                if len(tracks) > 30 and not '-m' in args.flags:
                     print("You listened to a crap ton of choons on that day or range")
                 else:
                     music_table = [['Music: {}'.format(len(tracks))]]
