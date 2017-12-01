@@ -14,6 +14,7 @@ class SpotifyHandler:
         self.base_url = self.sp['API_URL']
         self.auth = OauthHandler('spotify')
         self.access_token = self.auth.get_token()
+        print(self.access_token)
         if not self.access_token:
             self.auth.oauth_authorise()
 
@@ -25,11 +26,9 @@ class SpotifyHandler:
         if 'error' in p or playlists_req.status_code != 200:
             return 'error with access token'
         playlists = p['items']
-        for p in playlists:
-            self.get_tracks_from_playlist(p['owner']['id'], p['id'])
-        return True
+        return playlists
 
-    def get_tracks_from_playlist(self, owner, playlist):
+    def get_tracks_from_playlist(self, owner, playlist, features=False):
         tracks_req = requests.get(self.base_url + 'users/{}/playlists/{}/tracks'.format(owner, playlist),
                 headers={'Authorization': "Bearer {}".format(self.access_token)})
         t = tracks_req.json()
@@ -39,7 +38,9 @@ class SpotifyHandler:
         t_id = []
         for t in tracks:
             t_id.append(t['track']['id'])
-        self.get_track_features(t_id)
+        if features:
+            self.get_track_features(t_id)
+        return tracks
 
     def get_track_features(self, tracks):
         features_req = requests.get(self.base_url + 'audio-features?ids={}'.format(','.join(tracks)),
@@ -50,4 +51,5 @@ class SpotifyHandler:
         features = f['audio_features']
         for f in features:
             print(f)
+
 
