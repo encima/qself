@@ -21,12 +21,15 @@ class Music:
 if __name__ == '__main__':
     m = Music()
     p = m.s.get_playlists()
-    for pl in p:
-        name = pl['name']
-        if 'new music' in name.lower():
-            print(pl)
-            print('-----')
-            tracks = m.s.get_tracks_from_playlist('encima', pl['id'])
-            print(len(tracks))
+    if p is 'str' and 'error' in p.lower():
+        m.s.auth.oauth_authorise()
+    else:
+        for pl in p:
+            name = pl['name']
+            if 'new music' in name.lower():
+                print('-----')
+                print(pl['name'])
+                tracks = m.s.get_tracks_from_playlist('encima', pl['id'])
+                print(len(tracks))
 
 

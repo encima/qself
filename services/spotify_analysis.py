@@ -14,7 +14,6 @@ class SpotifyHandler:
         self.base_url = self.sp['API_URL']
         self.auth = OauthHandler('spotify')
         self.access_token = self.auth.get_token()
-        print(self.access_token)
         if not self.access_token:
             self.auth.oauth_authorise()
 
