@@ -18,14 +18,16 @@ class SpotifyHandler:
             self.auth.oauth_authorise()
 
 
-    def get_playlists(self):
-        playlists_req = requests.get(self.base_url + 'me/playlists', headers={
+    def get_playlists(self, url = None):
+        if not url:
+            url = self.base_url + 'me/playlists'
+        playlists_req = requests.get(url, headers={
                                 'Authorization': "Bearer {}".format(self.access_token)})
         p = playlists_req.json()
-        if 'error' in p or playlists_req.status_code != 200:
-            return 'error with access token'
-        playlists = p['items']
-        return playlists
+        if 'error' in str(p) or playlists_req.status_code != 200:
+            self.auth.oauth_authorise()
+        playlists = (p['items'])
+        return (playlists, p['next'])
 
     def get_tracks_from_playlist(self, owner, playlist, features=False):
         tracks_req = requests.get(self.base_url + 'users/{}/playlists/{}/tracks'.format(owner, playlist),
