@@ -50,7 +50,7 @@ class Music:
 
 if __name__ == '__main__':
     m = Music()
-    # m.get_new_music()
+    m.get_new_music()
     with open('data/tracks.txt', 'r') as tracks:
         t = json.load(tracks)
         newlist = sorted(t, key=lambda k: k['count'])
