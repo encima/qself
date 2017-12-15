@@ -25,8 +25,11 @@ class Music:
         playlists, next = self.s.get_playlists()
         while next:
             p, next = self.s.get_playlists(next)
-            playlists.append(p)
+            for x in p:
+                if 'new music' in x['name'].lower():
+                    playlists.append(x)
         else:
+            print(len(playlists))
             for pl in playlists:
                 print(pl)
                 if 'name' in pl:
@@ -50,7 +53,43 @@ class Music:
 
 if __name__ == '__main__':
     m = Music()
-    m.get_new_music()
-    with open('data/tracks.txt', 'r') as tracks:
-        t = json.load(tracks)
-        newlist = sorted(t, key=lambda k: k['count'])
+    # m.s.auth.oauth_authorise()
+    # m.get_new_music()
+    with open('data/new_tracks.txt', 'r') as tracks:
+        all_tracks = json.load(tracks)
+        formatted_tracks = {}
+        for track in all_tracks:
+            a = track['artist']
+            t = track['title']
+            k = '{}_{}'.format(a,t)
+            if k in formatted_tracks:
+                formatted_tracks[k]['count'] += track['count']
+            else:
+                formatted_tracks[k] = {'artist': a, 'count': track['count'], 'track': t}
+
+        sorted_tracks = formatted_tracks.values()
+        sorted_tracks = sorted(sorted_tracks, key=lambda k: k['count'], reverse=True)
+        # fails without dumps because " are translated to '
+        params = {
+  "description": "Top 100 scrobbles from the past 5 years for my monthly playlists",
+  "public": "true",
+  "name": "New Music Top 100 2012-2017"
+}
+        # res = m.s.create_playlist('encima', json.dumps(params))
+        uris = []
+        index = 0
+        matched = 0
+        while matched < 100:
+            t = sorted_tracks[index]
+            q = 'q=artist:{} track:{}&type=track'.format(t['artist'], t['track'])
+            res = m.s.search(q)
+            if res.status_code == 200:
+                results = res.json()['tracks']['items'] #maybe not the best assumption
+                if (len(results) > 0):
+                    track = results[0]
+                    matched += 1
+                    uris.append(track['uri'])
+            index += 1
+        ids = ",".join(uris)
+        res = m.s.add_tracks_to_playlist('encima', '3YQYmTWGLN3ZIveuXm59p6', ids)
+        print(res.status_code)

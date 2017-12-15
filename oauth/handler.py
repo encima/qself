@@ -31,7 +31,10 @@ class OauthHandler:
         self.server.start()
 
     def build_url(self):
-        auth = self.auth['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
+        if self.service == 'spotify':
+            auth = self.auth['AUTH_URL'] + self.config[self.service]['ARGS'].format(self.client_id, self.auth['SCOPES'], self.redirect_uri)
+        else:
+            auth = self.auth['AUTH_URL'] + self.config[self.service]['ARGS'].format(self.client_id, self.redirect_uri)
         return auth
 
     def get_token(self):

@@ -17,7 +17,6 @@ class LastfmHandler:
         self.library = pylast.Library(
             user=self.last['USERNAME'],
             network=self.network)
-        print(self.library)
 
     def get_tracks_for_range(self, start, end):
         start = start.replace(tzinfo=timezone.utc).timestamp()

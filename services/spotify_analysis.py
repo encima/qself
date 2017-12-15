@@ -53,4 +53,19 @@ class SpotifyHandler:
         for f in features:
             print(f)
 
+    def search(self, query):
+        search_req = requests.get(self.base_url + 'search', params=query, headers={'Authorization': "Bearer {}".format(self.access_token)})
+        return search_req
+
+    def create_playlist(self, owner, playlist):
+        create = requests.post(self.base_url + 'users/{}/playlists'.format(owner), data=playlist, headers={'Authorization': "Bearer {}".format(self.access_token)})
+        return create
+
+    # Tracks should be a comma separated list in a dict, i.e. {tracks: id1, id2}, Playlist should be an ID
+    def add_tracks_to_playlist(self, owner, playlist, tracks):
+        print(tracks)
+        add = requests.post(self.base_url + 'users/{}/playlists/{}/tracks?uris={}'.format(owner, playlist, tracks), headers={'Authorization': "Bearer {}".format(self.access_token)})
+        # a = add.json()
+        print(add)
+
 
