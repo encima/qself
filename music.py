@@ -53,7 +53,7 @@ class Music:
 
 if __name__ == '__main__':
     m = Music()
-    # m.s.auth.oauth_authorise()
+    m.s.auth.oauth_authorise()
     # m.get_new_music()
     with open('data/new_tracks.txt', 'r') as tracks:
         all_tracks = json.load(tracks)
@@ -88,6 +88,7 @@ if __name__ == '__main__':
                 if (len(results) > 0):
                     track = results[0]
                     matched += 1
+                    print(matched)
                     uris.append(track['uri'])
             index += 1
         ids = ",".join(uris)
