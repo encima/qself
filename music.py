@@ -2,6 +2,7 @@ import sys
 import os
 import datetime
 import json
+import csv
 from services import *
 from geopy.geocoders import Nominatim
 from terminaltables import AsciiTable
@@ -50,32 +51,49 @@ class Music:
             with open('data/tracks.txt', 'w') as tracks:
                 json.dump(all_tracks, tracks)
 
-
-if __name__ == '__main__':
-    m = Music()
-    m.s.auth.oauth_authorise()
-    # m.get_new_music()
-    with open('data/new_tracks.txt', 'r') as tracks:
-        all_tracks = json.load(tracks)
-        formatted_tracks = {}
-        for track in all_tracks:
-            a = track['artist']
-            t = track['title']
-            k = '{}_{}'.format(a,t)
-            if k in formatted_tracks:
-                formatted_tracks[k]['count'] += track['count']
-            else:
-                formatted_tracks[k] = {'artist': a, 'count': track['count'], 'track': t}
+    def sort_last_fm(self):
+        counts = []
+        with open('data/lastfm.csv', 'r') as f:
+            reader = csv.reader(f)
+            scrobbles = list(reader)
+            for s in scrobbles:
+                found = False
+                for c in counts:
+                    if c[0] == s[0] and ((c[2].lower() in s[2].lower()) or (s[2].lower() in c[2].lower())):
+                        c[4] += 1
+                        found = True
+                if not found:
+                    s.append(1)
+                    counts.append(s)
+            sort_tracks = counts.sort(key = lambda x: x[4])
+            with open('data/all_tracks.txt', 'w') as tracks:
+                writer = csv.writer(tracks)
+                writer.writerows(sort_tracks)
+        print('done')
+    
+    def match_spotify(self):
+        with open('data/new_tracks.txt', 'r') as tracks:
+            all_tracks = json.load(tracks)
+            formatted_tracks = {}
+            for track in all_tracks:
+                a = track['artist']
+                t = track['title']
+                k = '{}_{}'.format(a,t)
+                if k in formatted_tracks:
+                    formatted_tracks[k]['count'] += track['count']
+                else:
+                    formatted_tracks[k] = {'artist': a, 'count': track['count'], 'track': t}
 
         sorted_tracks = formatted_tracks.values()
         sorted_tracks = sorted(sorted_tracks, key=lambda k: k['count'], reverse=True)
         # fails without dumps because " are translated to '
         params = {
-  "description": "Top 100 scrobbles from the past 5 years for my monthly playlists",
+  "description": "Top 100 scrobbles from all years of all scrobbles",
   "public": "true",
-  "name": "New Music Top 100 2012-2017"
+  "name": "Top 100 2007-2017"
 }
-        # res = m.s.create_playlist('encima', json.dumps(params))
+        res = m.s.create_playlist('encima', json.dumps(params))
+        print(res)
         uris = []
         index = 0
         matched = 0
@@ -94,3 +112,11 @@ if __name__ == '__main__':
         ids = ",".join(uris)
         res = m.s.add_tracks_to_playlist('encima', '3YQYmTWGLN3ZIveuXm59p6', ids)
         print(res.status_code)
+
+if __name__ == '__main__':
+    m = Music()
+    # m.s.auth.oauth_authorise()
+    # m.get_new_music()
+    m.sort_last_fm()
+    
+        
