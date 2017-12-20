@@ -65,41 +65,48 @@ class Music:
                 if not found:
                     s.append(1)
                     counts.append(s)
+                # print(counts)
             sort_tracks = counts.sort(key = lambda x: x[4])
+            # print(sort_tracks)
             with open('data/all_tracks.txt', 'w') as tracks:
                 writer = csv.writer(tracks)
-                writer.writerows(sort_tracks)
+                writer.writerows(counts)
         print('done')
     
-    def match_spotify(self):
-        with open('data/new_tracks.txt', 'r') as tracks:
-            all_tracks = json.load(tracks)
-            formatted_tracks = {}
-            for track in all_tracks:
-                a = track['artist']
-                t = track['title']
-                k = '{}_{}'.format(a,t)
-                if k in formatted_tracks:
-                    formatted_tracks[k]['count'] += track['count']
-                else:
-                    formatted_tracks[k] = {'artist': a, 'count': track['count'], 'track': t}
+    def match_spotify(self, playlist, count=200, format='csv'):
+        sorted_tracks = []
+        with open('data/all_tracks.txt', 'r') as tracks:
+            if format == 'json':
+                all_tracks = json.load(tracks)
+                formatted_tracks = {}
+                for track in all_tracks:
+                    a = track['artist']
+                    t = track['title']
+                    k = '{}_{}'.format(a,t)
+                    if k in formatted_tracks:
+                        formatted_tracks[k]['count'] += track['count']
+                    else:
+                        formatted_tracks[k] = {'artist': a, 'count': track['count'], 'track': t}
 
-        sorted_tracks = formatted_tracks.values()
-        sorted_tracks = sorted(sorted_tracks, key=lambda k: k['count'], reverse=True)
+                sorted_tracks = formatted_tracks.values()
+                sorted_tracks = sorted(sorted_tracks, key=lambda k: k['count'], reverse=True)
+            elif format == 'csv':
+                reader = csv.reader(tracks)
+                all_tracks = list(reader)
+                sorted_tracks = sorted(all_tracks, key=lambda k: int(k[4]), reverse=True)
         # fails without dumps because " are translated to '
-        params = {
-  "description": "Top 100 scrobbles from all years of all scrobbles",
-  "public": "true",
-  "name": "Top 100 2007-2017"
-}
-        res = m.s.create_playlist('encima', json.dumps(params))
-        print(res)
+        res = m.s.create_playlist('encima', json.dumps(playlist))
+        pid = res.json()['id']
         uris = []
         index = 0
         matched = 0
-        while matched < 100:
+        while matched < count:
             t = sorted_tracks[index]
-            q = 'q=artist:{} track:{}&type=track'.format(t['artist'], t['track'])
+            q = ''
+            if format == 'csv':
+                q = 'q=artist:{} track:{}&type=track'.format(t[0], t[2])
+            elif format == 'json':
+                q = 'q=artist:{} track:{}&type=track'.format(t['artist'], t['track'])
             res = m.s.search(q)
             if res.status_code == 200:
                 results = res.json()['tracks']['items'] #maybe not the best assumption
@@ -108,15 +115,19 @@ class Music:
                     matched += 1
                     print(matched)
                     uris.append(track['uri'])
+                    if(len(uris) == 100):
+                        ids = ",".join(uris)
+                        res = m.s.add_tracks_to_playlist('encima', pid, ids)
+                        print(res)
+                        uris.clear()
             index += 1
-        ids = ",".join(uris)
-        res = m.s.add_tracks_to_playlist('encima', '3YQYmTWGLN3ZIveuXm59p6', ids)
-        print(res.status_code)
+        
 
 if __name__ == '__main__':
     m = Music()
     # m.s.auth.oauth_authorise()
+    m.match_spotify({ "description": "Top 200 scrobbles from all years of all scrobbles", "public": "true", "name": "Top 200 2007-2017"}, 200, 'csv')
     # m.get_new_music()
-    m.sort_last_fm()
+    # m.sort_last_fm()
     
         
