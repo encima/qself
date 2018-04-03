@@ -29,12 +29,13 @@ class OauthHandler:
         print("Go to the following URL and paste the code in the URL below:")
         print(self.build_url())
         self.server.start()
+        # requests.post('http://localhost:8080/shutdown')
 
     def build_url(self):
         if self.service == 'spotify':
             auth = self.auth['AUTH_URL'] + self.config[self.service]['ARGS'].format(self.client_id, self.auth['SCOPES'], self.redirect_uri)
         else:
-            auth = self.auth['AUTH_URL'] + self.config[self.service]['ARGS'].format(self.client_id, self.redirect_uri)
+            auth = self.auth['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
         return auth
 
     def get_token(self):
@@ -45,8 +46,12 @@ class OauthHandler:
         else:
             return res[0]
 
+    def convert_token(self):
+        pass
+
     def oauth_close(self):
-        self.server.shutdown()
+        self.server.shutdown_server(None)
+        # requests.post('http://localhost:8080/shutdown')
         self.server = None
 
     def oauth_token(self, url, args, method='GET'):

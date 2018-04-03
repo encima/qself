@@ -54,7 +54,7 @@ class Qself:
                     movies_table.append([x['movie']])
                 table = AsciiTable(movies_table)
                 print(table.table)
-                self.m.read_formatted(movies)
+               # self.m.read_formatted(movies)
                 places_table = [['Places: {}'.format(len(places))]]
                 for x in places:
                     places_table.append(['{}, {}'.format(x['venue']['name'], x['venue']['location']['country'])])

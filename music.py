@@ -4,7 +4,6 @@ import datetime
 import json
 import csv
 from services import *
-from geopy.geocoders import Nominatim
 from terminaltables import AsciiTable
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -75,7 +74,7 @@ class Music:
     
     def match_spotify(self, playlist, count=200, format='csv'):
         sorted_tracks = []
-        with open('data/all_tracks.txt', 'r') as tracks:
+        with open('data/tracks.txt', 'r') as tracks:
             if format == 'json':
                 all_tracks = json.load(tracks)
                 formatted_tracks = {}
@@ -125,8 +124,7 @@ class Music:
 
 if __name__ == '__main__':
     m = Music()
-    # m.s.auth.oauth_authorise()
-    m.match_spotify({ "description": "Top 200 scrobbles from all years of all scrobbles", "public": "true", "name": "Top 200 2007-2017"}, 200, 'csv')
+    #m.match_spotify({ "description": "Top 200 scrobbles from all years of all scrobbles", "public": "true", "name": "Top 200 2007-2017"}, 200, 'csv')
     # m.get_new_music()
     # m.sort_last_fm()
     
