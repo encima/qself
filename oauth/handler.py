@@ -44,7 +44,7 @@ class OauthHandler:
         if not res:
             return None
         else:
-            return res[0]
+            return res[0] 
 
     def convert_token(self):
         pass
