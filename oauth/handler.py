@@ -61,6 +61,15 @@ class OauthHandler:
             r = requests.post(url, data=args)
         return r.json()
 
+    def sign_request(self, key, base_string):
+        from hashlib import sha1
+        import hmac
+
+        hashed = hmac.new(key.encode(), base_string.encode(), sha1)
+
+        # The signature
+        return hashed.digest().encode("base64").rstrip('\n')
+
     def save_code(self, args):
         print('CODE RECEIVED')
         params = {"client_id": self.client_id, "client_secret":self.client_secret,
