@@ -45,12 +45,12 @@ class TwitterHandler:
         BASE_STRING = method + '&' + urllib.parse.quote(url, '') + '&' + urllib.parse.quote(PARAMETER_STRING, '')
         SIGNING_KEY = urllib.parse.quote(self.tw['CLIENT_SECRET'], '') + '&'
         if token:
-            SIGNING_KEY += urllib.parse.quote(token)
+            SIGNING_KEY += urllib.parse.quote(token, '')
         params['oauth_signature'] = urllib.parse.quote(base64.standard_b64encode(hmac.new(SIGNING_KEY.encode(), BASE_STRING.encode(), sha1).digest()).decode('ascii'))
 
         HEADER = "OAuth "
         HEADER += ', '.join('{}={}'.format(key,val) for (key,val) in params.items())
-
+        print(HEADER)
         return {HEADER_TITLE: HEADER}
 
     def get_request_token(self):

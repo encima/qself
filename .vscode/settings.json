@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "${workspaceRoot}/qs/bin/python"
+    "python.pythonPath": "${workspaceRoot}/qs/bin/python",
+    "python.linting.pylintEnabled": false
 }
