@@ -60,13 +60,12 @@ class OauthHandler:
         # requests.post('http://localhost:8080/shutdown')
         self.server = None
 
-    def oauth_token(self, url, args, method='GET'):
+    def oauth_token(self, url, args, method = 'GET', header = None):
         if method == 'GET':
-            r = requests.get(url, params=args)
+            r = requests.get(url, params=args, headers=header)
         else:
-            r = requests.post(url, data=args)
-        print(r.text)
-        return r.json()
+            r = requests.post(url, data=args, headers=header)
+        return r
 
     def sign_request(self, key, base_string):
         from hashlib import sha1
@@ -82,7 +81,7 @@ class OauthHandler:
         params = {"client_id": self.client_id, "client_secret":self.client_secret,
                   "grant_type":"authorization_code", "redirect_uri":self.redirect_uri,
                   "code": args['code']}
-        token_res = self.oauth_token(self.access_url, params, self.auth['TOKEN_VERB'])
+        token_res = self.oauth_token(self.access_url, params, self.auth['TOKEN_VERB']).json()
         if self.token_key in token_res:
             access_token = token_res['access_token']
             print(access_token)

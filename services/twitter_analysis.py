@@ -5,6 +5,7 @@ import sqlite3
 import random
 import urllib
 import time
+import json
 import base64, hmac
 from hashlib import sha1
 
@@ -19,8 +20,8 @@ class TwitterHandler:
         self.auth = OauthHandler('twitter')
         self.access_token = self.auth.get_token()
         if not self.access_token:
-            resp = self.get_request_token().split('&')
-            token = resp[0].split('=')[1]
+            resp = dict(urllib.parse.parse_qsl(self.get_request_token()))
+            token = resp['oauth_token']
             url =self.tw['AUTH_URL'] + self.tw['ARGS'].format(token=token)
             print(url)
             self.auth.oauth_authorise(url, self.save_code)
@@ -67,19 +68,18 @@ class TwitterHandler:
     def save_code(self, args):
         print('CODE RECEIVED')
         params = {"oauth_verifier": args['oauth_verifier']}
-        print(args)
         header = self.build_auth_header(url = self.tw['TOKEN_URL'], token=args['oauth_token'])
-        token_res = self.auth.oauth_token(self.tw['TOKEN_URL'], params, self.auth['TOKEN_VERB'] or 'POST', header)
-        if self.token_key in token_res:
-            access_token = token_res['access_token']
-            print(access_token)
-            self.conn.cursor().execute('DELETE FROM tokens WHERE service="{}"'.format(self.service))
-            self.conn.cursor().execute('INSERT INTO tokens VALUES(?,?)', (self.service, access_token))
-            self.conn.commit()
+        token_res = self.auth.oauth_token(self.tw['TOKEN_URL'], params, self.tw['TOKEN_VERB'], header).text
+        token_res = dict(urllib.parse.parse_qsl(token_res))
+        if self.auth.token_key in token_res:
+            access_token = token_res[self.auth.token_key]
+            self.auth.conn.cursor().execute('DELETE FROM tokens WHERE service="{}"'.format(self.auth.service))
+            self.auth.conn.cursor().execute('INSERT INTO tokens VALUES(?,?)', (self.auth.service, json.dumps(token_res)))
+            self.auth.conn.commit()
             print('Saved new token')
-            self.oauth_close()
+            self.auth.oauth_close()
             return access_token 
         else:
             print('Something happened when trying to get your token')
-            self.oauth_close()
+            self.auth.oauth_close()
             return None
