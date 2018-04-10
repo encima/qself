@@ -15,6 +15,7 @@ class OauthHandler:
         self.client_secret = self.auth['CLIENT_SECRET']
         self.redirect_uri = self.auth['REDIRECT']
         self.access_url = self.auth['TOKEN_URL']
+        self.token_key = self.auth['TOKEN_KEY'] or 'access_token'
         self.base_url = self.auth['API_URL']
         self.server = None
         self.conn = sqlite3.connect('data/tokens.db', check_same_thread=False)
@@ -22,18 +23,23 @@ class OauthHandler:
         self.cursor.execute('CREATE TABLE IF NOT EXISTS tokens (service text, token text)')
         self.conn.commit()
 
-    def oauth_authorise(self):
+    def oauth_authorise(self, url = None, cb = None):
         if not self.server:
             self.server = OauthServer()
-        self.server.add_endpoint('/{}'.format(self.service), self.service, self.save_code)
+        if not cb:
+            cb = self.save_code
+        self.server.add_endpoint('/{}'.format(self.service), self.service, cb)
         print("Go to the following URL and paste the code in the URL below:")
-        print(self.build_url())
+        if not url:
+            url = self.build_url()
+        print(url)
         self.server.start()
         # requests.post('http://localhost:8080/shutdown')
 
     def build_url(self):
-        if self.service == 'spotify':
-            auth = self.auth['AUTH_URL'] + self.config[self.service]['ARGS'].format(self.client_id, self.auth['SCOPES'], self.redirect_uri)
+        auth = self.auth['AUTH_URL']
+        if self.config[self.service]['ARGS']:
+            auth += self.config[self.service]['ARGS']
         else:
             auth = self.auth['AUTH_URL'] + self.config['oauth']['ARGS'].format(self.client_id, self.redirect_uri)
         return auth
@@ -59,6 +65,7 @@ class OauthHandler:
             r = requests.get(url, params=args)
         else:
             r = requests.post(url, data=args)
+        print(r.text)
         return r.json()
 
     def sign_request(self, key, base_string):
@@ -76,7 +83,7 @@ class OauthHandler:
                   "grant_type":"authorization_code", "redirect_uri":self.redirect_uri,
                   "code": args['code']}
         token_res = self.oauth_token(self.access_url, params, self.auth['TOKEN_VERB'])
-        if 'access_token' in token_res:
+        if self.token_key in token_res:
             access_token = token_res['access_token']
             print(access_token)
             self.conn.cursor().execute('DELETE FROM tokens WHERE service="{}"'.format(self.service))
@@ -84,7 +91,7 @@ class OauthHandler:
             self.conn.commit()
             print('Saved new token')
             self.oauth_close()
-            return access_token
+            return access_token 
         else:
             print('Something happened when trying to get your token')
             self.oauth_close()
