@@ -24,7 +24,7 @@ six==1.11.0
 terminaltables==3.1.0
 tmdbsimple==1.8.0
 todoist==0.0.1
-urllib3==1.22
+urllib3==1.26.5
 Werkzeug==0.12.2
 wrapt==1.10.11
 yapf==0.19.0
